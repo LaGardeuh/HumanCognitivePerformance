@@ -1,1 +1,40 @@
-print("Hello World")
+import time
+
+import numpy as np
+import pandas as pd
+from sklearn.dummy import DummyRegressor
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+
+df = pd.read_csv('human_cognitive_performance.csv')
+
+df.head()
+df.describe()
+df.info()
+
+X = df.iloc[:, :-3]
+y = df.iloc[:, -3:]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+start_time = time.time()
+dummy_mean = DummyRegressor(strategy='mean')
+dummy_mean.fit(X_train, y_train)
+end_time = time.time()
+
+start_time = time.time()
+dummy_median = DummyRegressor(strategy='median')
+dummy_median.fit(X_train, y_train)
+end_time = time.time()
+
+y_pred_mean_test = dummy_mean.predict(X_test)
+y_pred_median_test = dummy_median.predict(X_test)
+
+print("Training set statistics:")
+print(f"Mean of targets: {y_train.mean().values}")
+print(f"Median of targets: {y_train.median().values}")
+
+mse_mean = mean_squared_error(y_test, y_pred_mean_test)
+mse_median = mean_squared_error(y_test, y_pred_median_test)
+print(f'RMSE with mean strategy: {np.sqrt(mse_mean):.4f}')
+print(f'RMSE with median strategy: {np.sqrt(mse_median):.4f}')
